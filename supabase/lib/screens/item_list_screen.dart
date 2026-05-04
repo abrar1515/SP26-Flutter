@@ -34,6 +34,55 @@ class _ItemListScreenState extends State<ItemListScreen> {
     }
   }
 
+  Future<void> _openDetails(Item item) async {
+    final shouldRefresh = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ItemDetailScreen(service: _service, item: item),
+      ),
+    );
+
+    if (shouldRefresh == true && mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _confirmAndDelete(Item item) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete item?'),
+          content: Text('Are you sure you want to delete "${item.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != true) {
+      return;
+    }
+
+    await _service.deleteItem(item.id);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {});
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Item deleted successfully.')));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,20 +133,13 @@ class _ItemListScreenState extends State<ItemListScreen> {
                         ? item.description!
                         : 'No description',
                   ),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            ItemDetailScreen(service: _service, item: item),
-                      ),
-                    );
-                  },
+                  onTap: () => _openDetails(item),
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'edit') {
                         await _openForm(item: item);
                       } else if (value == 'delete') {
-                        await _service.deleteItem(item.id);
+                        await _confirmAndDelete(item);
                       }
                     },
                     itemBuilder: (_) => const [

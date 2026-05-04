@@ -3,8 +3,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'screens/item_list_screen.dart';
 
-const String supabaseUrl = 'Supabase Project URL here';
-const String supabaseAnonKey = 'Project Anon Key here';
+const String supabaseUrl = 'supabase project URL here';
+const String supabaseAnonKey = 'project anon key here';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

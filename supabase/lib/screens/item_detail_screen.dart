@@ -42,9 +42,33 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   Future<void> _deleteItem() async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete item?'),
+          content: Text('Are you sure you want to delete "${_item.title}"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete != true) {
+      return;
+    }
+
     await widget.service.deleteItem(_item.id);
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     }
   }
 
